@@ -1,12 +1,12 @@
 const BASE_URL =
   process.env.NODE_ENV === 'development'
     ? 'http://localhost:5000'
-    : 'https://gateway-6epe.onrender.com';
+    : 'https://parkx-server-63im.onrender.com';
 
 const FRONTEND_BASE_URL =
   process.env.NODE_ENV === 'development'
     ? 'http://localhost:5173'
-    : 'https://itdepartment-main.vercel.app';
+    : 'https://parkx-main.vercel.app';
 
 console.log(process.env.NODE_ENV);
 
