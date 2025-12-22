@@ -9,12 +9,15 @@ import { useEffect } from "react";
 import axios from "axios";
 import { useState } from "react";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
+import { BASE_URL } from "./Utils/constants";
+
+
 
 export default function App() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/analytics")
+    axios.get(`${BASE_URL}/api/analytics`)
       .then(res => setData(res.data))
       .catch(err => console.error(err));
   }, []);
