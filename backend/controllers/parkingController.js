@@ -11,16 +11,13 @@ const validateVehicle = (num) => {
   // TN01AB1234
   // KA5MK9876
   // MH12DE1433
-  const indianRegex =
-    /^[A-Z]{2}\d{1,2}[A-Z]{1,2}\d{4}$/;
+  const indianRegex = /^[A-Z]{2}\d{1,2}[A-Z]{1,2}\d{4}$/;
 
   // Generic fallback (commercial / temporary / custom plates)
-  const genericRegex =
-    /^[A-Z0-9]{6,12}$/;
+  const genericRegex = /^[A-Z0-9]{6,12}$/;
 
   return indianRegex.test(value) || genericRegex.test(value);
 };
-
 
 const validatePhone = (phone) => /^[6-9]\d{9}$/.test(phone);
 
@@ -66,12 +63,11 @@ exports.parkVehicle = async (req, res) => {
     });
 
     if (activeParking) {
-      return res
-        .status(400)
-        .json({ message: "Vehicle already parked" });
+      return res.status(400).json({ message: "Vehicle already parked" });
     }
 
     slot.isOccupied = true;
+    slot.vehicleNumber = vehicleNumber.toUpperCase().trim();
     await slot.save();
 
     const parking = await Parking.create({
@@ -94,38 +90,95 @@ exports.parkVehicle = async (req, res) => {
   }
 };
 
-
 /* ---------------- RELEASE SLOT ---------------- */
+// exports.releaseSlot = async (req, res) => {
+//   try {
+//     const { slotNumber } = req.body;
+
+//     const slot = await Slot.findOne({ slotNumber });
+//     if (!slot) return res.status(404).json({ message: "Invalid slot" });
+
+//     if (!slot.isOccupied) {
+//       return res.status(400).json({ message: "Slot already vacant" });
+//     }
+
+//     slot.isOccupied = false;
+//     await slot.save();
+
+//     const parking = await Parking.findOne({
+//       slotNumber,
+//       exitTime: null,
+//     }).sort({ entryTime: -1 });
+
+//     if (parking) {
+//       parking.exitTime = new Date();
+//       await parking.save();
+//     }
+
+//     res.json({
+//       message: `Slot ${slotNumber} released successfully`,
+//       session: parking,
+//     });
+//   } catch (error) {
+//     console.error("Release Error:", error);
+//     res.status(500).json({ message: "Server error during release" });
+//   }
+// };
+
+
 exports.releaseSlot = async (req, res) => {
   try {
     const { slotNumber } = req.body;
 
     const slot = await Slot.findOne({ slotNumber });
-    if (!slot) return res.status(404).json({ message: "Invalid slot" });
+    if (!slot) {
+      return res.status(404).json({ message: "Invalid slot" });
+    }
 
     if (!slot.isOccupied) {
       return res.status(400).json({ message: "Slot already vacant" });
     }
 
-    slot.isOccupied = false;
-    await slot.save();
-
+    // 🔹 Find active parking session
     const parking = await Parking.findOne({
       slotNumber,
       exitTime: null,
     }).sort({ entryTime: -1 });
 
-    if (parking) {
-      parking.exitTime = new Date();
-      await parking.save();
+     const parkingData = await Parking.findOne();
+     console.log(parkingData)
+
+    if (!parking) {
+      return res.status(404).json({ message: "Parking session not found" });
     }
+
+    // 🔹 Exit time
+    parking.exitTime = new Date();
+
+    // 🔹 Duration calculation (minutes)
+    const durationMs = parking.exitTime - parking.entryTime;
+    const durationMinutes = Math.ceil(durationMs / (1000 * 60));
+    parking.durationMinutes = durationMinutes;
+
+    // 🔹 Price calculation (example rule)
+    // ₹20 per hour (minimum 1 hour)
+    const hours = Math.ceil(durationMinutes / 60);
+    parking.amount = hours * 20;
+
+    await parking.save();
+
+    // 🔹 Free slot
+    slot.isOccupied = false;
+    slot.vehicleNumber = null;
+    await slot.save();
 
     res.json({
       message: `Slot ${slotNumber} released successfully`,
-      session: parking,
+      bill: parking,
     });
   } catch (error) {
     console.error("Release Error:", error);
     res.status(500).json({ message: "Server error during release" });
   }
 };
+

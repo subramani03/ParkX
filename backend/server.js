@@ -6,6 +6,8 @@ const connectDB = require("./config/db");
 const parkingRoutes = require("./routes/parkingRoutes");
 const slotRoutes = require("./routes/slotRoutes");
 const cookieParser = require("cookie-parser");
+const analyticsRoutes = require("./routes/analyticsRoutes");
+
 
 
 const app = express();
@@ -14,6 +16,7 @@ app.use(cookieParser());
 /* Middleware */
 const  FRONTEND_BASE_URL = require("./utils/constants.js");
 
+console.log(FRONTEND_BASE_URL)
 app.use(
   cors({
     origin: FRONTEND_BASE_URL, // Make sure this matches the frontend origin exactly
@@ -30,6 +33,8 @@ connectDB();
 /* Routes */
 app.use("/api/parking", parkingRoutes);
 app.use("/api/slots", slotRoutes); 
+app.use("/api/analytics", analyticsRoutes);
+
 
 /* Health check */
 app.get("/", (req, res) => {

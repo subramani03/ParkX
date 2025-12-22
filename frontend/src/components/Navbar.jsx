@@ -43,7 +43,8 @@ const Navbar = () => {
                         {[
                             { name: 'Home', path: '/' },
                             { name: 'Slots', path: '/slotmanager' },
-                            { name: 'Scanner', path: '/qrscanner' }
+                            { name: 'Scanner', path: '/qrscanner' },
+                            { name: 'Dashboard', path: '/dashboard' },
                         ].map((link) => (
                             <Link 
                                 key={link.path}
@@ -76,7 +77,7 @@ const Navbar = () => {
                             <li className="menu-title text-slate-500 text-[10px] uppercase tracking-[0.2em] mb-2 px-4 pt-2">Quick Access</li>
                             <li>
                                 <Link to={'/'} className={`py-3 rounded-xl mb-1 ${isActive('/') ? 'bg-indigo-600/10 text-indigo-400 font-bold' : 'text-slate-300'}`}>
-                                    Dashboard
+                                    Home
                                 </Link>
                             </li>
                             <li>
@@ -87,6 +88,11 @@ const Navbar = () => {
                             <li>
                                 <Link to={'/slotmanager'} className={`py-3 rounded-xl ${isActive('/slotmanager') ? 'bg-indigo-600/10 text-indigo-400 font-bold' : 'text-slate-300'}`}>
                                     Slot Analytics
+                                </Link>
+                            </li>
+                             <li>
+                                <Link to={'/dashboard'} className={`py-3 rounded-xl mb-1 ${isActive('/') ? 'bg-indigo-600/10 text-indigo-400 font-bold' : 'text-slate-300'}`}>
+                                    Dashboard
                                 </Link>
                             </li>
                         </ul>

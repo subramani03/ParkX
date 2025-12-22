@@ -79,6 +79,7 @@ exports.toggleSlot = async (req, res) => {
     }
 
     slot.isOccupied = !slot.isOccupied;
+    slot.vehicleNumber =  null;
     await slot.save();
 
     res.json(slot);
