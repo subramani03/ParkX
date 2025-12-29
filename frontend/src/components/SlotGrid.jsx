@@ -207,7 +207,7 @@ export default function SlotGrid() {
                 </div>
                 <div className="pt-2">
                   <p className="text-[10px] text-slate-400 uppercase font-bold text-center">Entry Timestamp</p>
-                  <p className="text-xs font-medium text-center">{formatDateTime(billData.exitTime)}</p>
+                  <p className="text-xs font-medium text-center">{formatDateTime(billData.entryTime)}</p>
                 </div>
 
                 {qrImage && (

@@ -161,9 +161,9 @@ exports.releaseSlot = async (req, res) => {
     parking.durationMinutes = durationMinutes;
 
     // 🔹 Price calculation (example rule)
-    // ₹20 per hour (minimum 1 hour)
-    const hours = Math.ceil(durationMinutes / 60);
-    parking.amount = hours * 20;
+    // ₹2 per hour (minimum 1 hour)
+    const days = Math.ceil(durationMinutes / 1440);
+    parking.amount = days * 20;
 
     await parking.save();
 
