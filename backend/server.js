@@ -7,7 +7,8 @@ const parkingRoutes = require("./routes/parkingRoutes");
 const slotRoutes = require("./routes/slotRoutes");
 const cookieParser = require("cookie-parser");
 const analyticsRoutes = require("./routes/analyticsRoutes");
-
+const authMiddleware = require("./middleware/authMiddleware");
+const { getExpectedToken } = require("./utils/authHelper");
 
 
 const app = express();
@@ -31,9 +32,9 @@ app.use(
 connectDB();
 
 /* Routes */
-app.use("/api/parking", parkingRoutes);
-app.use("/api/slots", slotRoutes); 
-app.use("/api/analytics", analyticsRoutes);
+app.use("/api/parking", authMiddleware, parkingRoutes);
+app.use("/api/slots", authMiddleware, slotRoutes); 
+app.use("/api/analytics", authMiddleware, analyticsRoutes);
 
 
 /* Health check */
@@ -51,7 +52,7 @@ app.post("/adminLogin", (req, res) => {
     ) {
         res.cookie(
             "token",
-            process.env.ADMIN_USERNAME + "!@#123" + process.env.ADMIN_PASSWORD,
+            getExpectedToken(),
             {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
@@ -68,7 +69,7 @@ app.post("/adminLogin", (req, res) => {
 // 4. Update the Auth Check
 app.get("/checkAuth", (req, res) => {
     const token = req.cookies.token; 
-    const expectedToken = process.env.ADMIN_USERNAME + "!@#123" + process.env.ADMIN_PASSWORD;
+    const expectedToken = getExpectedToken();
     
     if (token === expectedToken) {
         return res.json({ authenticated: true });
