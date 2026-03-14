@@ -1,11 +1,8 @@
 const Slot = require("../models/Slot");
 const Parking = require("../models/Parking");
 const generateQR = require("../utils/qrGenerator");
-<<<<<<< HEAD
-=======
 const { generateBillImage, generateExitReceiptImage } = require("../utils/billGenerator");
 const { sendParkingTicket, sendExitReceipt } = require("../utils/whatsappService");
->>>>>>> 4e08e25 (adding twilio message service)
 
 const validateVehicle = (num) => {
   if (!num) return false;
@@ -83,8 +80,6 @@ exports.parkVehicle = async (req, res) => {
     });
 
     const qrImage = await generateQR(slotNumber);
-<<<<<<< HEAD
-=======
     const billImage = await generateBillImage(parking, qrImage);
 
     // 🔹 Auto-send WhatsApp ticket (non-blocking)
@@ -95,17 +90,13 @@ exports.parkVehicle = async (req, res) => {
         }
       })
       .catch((err) => console.error("WhatsApp send error:", err));
->>>>>>> 4e08e25 (adding twilio message service)
 
     res.status(201).json({
       message: "Parking successful",
       bill: parking,
       qrImage,
-<<<<<<< HEAD
-=======
       billImage,
       whatsappSent: true,
->>>>>>> 4e08e25 (adding twilio message service)
     });
   } catch (error) {
     console.error("Park Error:", error);
@@ -195,11 +186,6 @@ exports.releaseSlot = async (req, res) => {
     slot.vehicleNumber = null;
     await slot.save();
 
-<<<<<<< HEAD
-    res.json({
-      message: `Slot ${slotNumber} released successfully`,
-      bill: parking,
-=======
     // 🔹 Generate Receipt Image
     const receiptImage = await generateExitReceiptImage(parking);
 
@@ -217,7 +203,6 @@ exports.releaseSlot = async (req, res) => {
       bill: parking,
       receiptImage,
       whatsappSent: true,
->>>>>>> 4e08e25 (adding twilio message service)
     });
   } catch (error) {
     console.error("Release Error:", error);
