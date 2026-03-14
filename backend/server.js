@@ -9,6 +9,7 @@ const cookieParser = require("cookie-parser");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const authMiddleware = require("./middleware/authMiddleware");
 const { getExpectedToken } = require("./utils/authHelper");
+const { initTwilio } = require("./utils/whatsappService");
 
 
 const app = express();
@@ -30,6 +31,9 @@ app.use(
 
 /* Database connection */
 connectDB();
+
+/* Initialize WhatsApp Service */
+initTwilio();
 
 /* Routes */
 app.use("/api/parking", authMiddleware, parkingRoutes);

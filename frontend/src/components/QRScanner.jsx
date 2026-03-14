@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { Camera, ShieldCheck, RefreshCw, Image as ImageIcon, Zap } from "lucide-react";
+import { Camera, ShieldCheck, RefreshCw, Image as ImageIcon, Zap, X, Car, Clock, Wallet, Phone, MapPin } from "lucide-react";
 import { BASE_URL } from "../Utils/constants";
 
 
@@ -14,6 +14,7 @@ export default function QRScanner() {
   const [status, setStatus] = useState("scanning");
   const [lastScanned, setLastScanned] = useState(null);
   const [scanMethod, setScanMethod] = useState("camera");
+  const [billData, setBillData] = useState(null);
 
   useEffect(() => {
     if (scanMethod === "camera") {
@@ -69,17 +70,49 @@ export default function QRScanner() {
       const slotNumber = match[0].toUpperCase();
       setLastScanned(slotNumber);
 
-      await axios.post(`${API}/release`, { slotNumber });
+      const res = await axios.post(`${API}/release`, { slotNumber });
+      setBillData(res.data.bill);
       toast.success(`DEPARTURE: ${slotNumber}`);
       setStatus("success");
 
       await stopCamera();
-      setTimeout(() => (window.location.href = "/"), 2000);
     } catch (err) {
-      toast.error(err.message || "Invalid Token");
+      toast.error(err.response?.data?.message || err.message || "Invalid Token");
       setStatus("scanning");
       isProcessingRef.current = false;
     }
+  };
+
+  const closeBillPopup = () => {
+    setBillData(null);
+    setLastScanned(null);
+    setStatus("scanning");
+    isProcessingRef.current = false;
+    if (scanMethod === "camera") {
+      startCamera();
+    }
+  };
+
+  const goToHome = () => {
+    window.location.href = "/";
+  };
+
+  const formatDateTime = (date) => {
+    if (!date) return "---";
+    return new Date(date).toLocaleString("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  };
+
+  const formatDuration = (minutes) => {
+    if (!minutes) return "---";
+    if (minutes < 60) return `${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours < 24) return `${hours}h ${mins}m`;
+    const days = Math.floor(hours / 24);
+    return `${days} day${days > 1 ? 's' : ''} ${hours % 24}h`;
   };
 
   return (
@@ -152,7 +185,7 @@ export default function QRScanner() {
           </div>
         )}
 
-        {status === "success" && (lastScanned &&
+        {status === "success" && !billData && (lastScanned &&
           <div className="absolute inset-0 z-30 bg-emerald-600 flex flex-col items-center justify-center animate-in zoom-in-95">
             <ShieldCheck className="w-16 h-16 text-white mb-2" />
             <h3 className="text-2xl font-black text-white">{lastScanned}</h3>
@@ -174,6 +207,114 @@ export default function QRScanner() {
       <p className="mt-8 text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] text-center max-w-[250px] leading-relaxed">
         System active: {scanMethod === 'camera' ? 'Video Sync Operational' : 'Ready for Image Input'}
       </p>
+
+      {/* BILL POPUP MODAL */}
+      {billData && (
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-[200] p-4 animate-in fade-in duration-300">
+          <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] w-full max-w-[400px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            
+            {/* Header */}
+            <div className="bg-emerald-600 p-6 text-center relative">
+              <div className="absolute top-4 right-4">
+                <button 
+                  onClick={closeBillPopup}
+                  className="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+              <ShieldCheck className="w-12 h-12 text-white mx-auto mb-2" />
+              <h3 className="text-xl font-black text-white uppercase tracking-wide">Departure Cleared</h3>
+              <p className="text-[10px] text-white/80 uppercase tracking-widest mt-1">Slot {billData.slotNumber} Released</p>
+            </div>
+
+            {/* Bill Details */}
+            <div className="p-6 space-y-4">
+              
+              {/* Vehicle Info */}
+              <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-indigo-600/20 rounded-xl">
+                    <Car className="w-5 h-5 text-indigo-400" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Vehicle Number</p>
+                    <p className="text-lg font-black text-white uppercase">{billData.vehicleNumber}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-slate-800 rounded-xl">
+                    <Phone className="w-4 h-4 text-slate-400" />
+                  </div>
+                  <p className="text-sm text-slate-300 font-mono">{billData.phone}</p>
+                </div>
+              </div>
+
+              {/* Time Info */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-4 h-4 text-emerald-500" />
+                    <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Entry</p>
+                  </div>
+                  <p className="text-xs font-bold text-white">{formatDateTime(billData.entryTime)}</p>
+                </div>
+                <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-4 h-4 text-rose-500" />
+                    <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Exit</p>
+                  </div>
+                  <p className="text-xs font-bold text-white">{formatDateTime(billData.exitTime)}</p>
+                </div>
+              </div>
+
+              {/* Duration */}
+              <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-amber-600/20 rounded-xl">
+                    <MapPin className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Duration</p>
+                    <p className="text-sm font-bold text-white">{formatDuration(billData.durationMinutes)}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Slot</p>
+                  <p className="text-lg font-black text-indigo-400">{billData.slotNumber}</p>
+                </div>
+              </div>
+
+              {/* Amount to Collect */}
+              <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-5 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Wallet className="w-5 h-5 text-white/80" />
+                  <p className="text-[10px] text-white/80 uppercase tracking-widest font-bold">Amount to Collect</p>
+                </div>
+                <p className="text-4xl font-black text-white">₹{billData.amount || 0}</p>
+              </div>
+
+            </div>
+
+            {/* Actions */}
+            <div className="p-6 pt-0 flex gap-3">
+              <button
+                onClick={closeBillPopup}
+                className="flex-1 py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl transition-all text-sm uppercase tracking-widest"
+              >
+                Scan Next
+              </button>
+              <button
+                onClick={goToHome}
+                className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all text-sm uppercase tracking-widest shadow-lg shadow-emerald-600/20"
+              >
+                Done
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
