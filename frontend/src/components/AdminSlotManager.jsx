@@ -92,7 +92,7 @@ export default function AdminSlotManager() {
           </div>
           <div>
             <h2 className="text-xl font-black tracking-tight text-slate-100">ADMIN <span className="text-indigo-500">CONTROL</span></h2>
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">System Management</p>
+            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Slot Management</p>
           </div>
         </div>
         

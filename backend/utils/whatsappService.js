@@ -59,7 +59,7 @@ const uploadImage = async (base64String) => {
     const form = new FormData();
     form.append("image", base64Data);
 
-    const response = await axios.post(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, form, {
+    const response = await axios.post(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}&expiration=600`, form, {
       headers: form.getHeaders(),
     });
 

@@ -44,8 +44,6 @@ export default function App() {
           <Route path="slotmanager" element={<AdminSlotManager />} />
           <Route path="dashboard" element={<AnalyticsDashboard data={data} />} />
 
-
-
         </Route>
 
       </Routes>

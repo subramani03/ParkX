@@ -7,7 +7,6 @@ import { BASE_URL } from "../Utils/constants";
 
 
 const API = `${BASE_URL}/api/parking`;
-
 export default function SlotGrid() {
   const [slots, setSlots] = useState([]);
   const [vehicleNumber, setVehicleNumber] = useState("");
@@ -85,6 +84,8 @@ export default function SlotGrid() {
     acc[row].push(slot);
     return acc;
   }, {});
+
+  console.log(rows)
 
   const formatDateTime = (date) => {
     return new Date(date).toLocaleString("en-IN", {
